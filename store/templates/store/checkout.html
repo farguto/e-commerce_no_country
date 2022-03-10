@@ -1,0 +1,286 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="box-element" id="form-wrapper">
+            <form id="form">
+                <div id="user-info">
+                    <p>Datos Personales:</p>
+                    <hr>
+                    <div class="form-field">
+                        <input required class="form-control" type="name" name="name" placeholder="Nombre..">
+                    </div>
+                    <div class="form-field">
+                        <input required class="form-control" type="phone" name="phone" placeholder="Telefono..">
+                    </div>
+                    <div class="form-field">
+                        <input required class="form-control" type="email" name="email" placeholder="Email..">
+                    </div>
+                    <div class="form-field">
+                        <input required class="form-control" type="cellphone" name="cellphone" placeholder="Celular..">
+                    </div>
+
+                </div>
+
+                
+              
+                <div>
+                    <div class="form-check">
+                        <label class="form-check-label" for="flexCheckDefault">
+                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" onclick="EnableDisableTextbox(this);ResetTextbox(EnableDisableTextbox);">
+                          Retiro en el local
+                        </label>
+                      </div>
+                </div>
+
+                <div id="shipping-info">
+                    <div id="datos-compra">
+                    <hr>
+                    <p>Datos de Envío:</p>
+                    <hr>
+                    <div class="form-field">
+                        <input required class="form-control" id="shipto1" type="text" name="address" placeholder="Direccion..">
+                    </div>
+                    <div class="form-field">
+                        <input required class="form-control" id="shipto2"  type="text" name="city" placeholder="Ciudad..">
+                    </div>
+                    <div class="form-field">
+                        <input required class="form-control" id="shipto3" type="text" name="state" placeholder="Provincia..">
+                    </div>
+                    <div class="form-field">
+                        <input required class="form-control" id="shipto4" type="text" name="zipcode" placeholder="Codigo Postal..">
+                    </div>
+                    </div>
+                
+
+                    <div class="form-group" id="credit_cards">
+                        <img class="row-image" src="{% static 'images/visa.png' %}" id="visa">
+                        <img class="row-image" src="{% static 'images/mastercard.png' %}" id="mastercard">
+                        <img class="row-image" src="{% static 'images/americanexpress.png' %}" id="americanexpress">
+                    </div>
+                </div>
+                <hr>
+                <input id="form-button" class="btn btn-success btn-block" type="submit" value="Continuar">
+            </form>
+        </div>
+
+        <!-- Inicio Cambios -->
+        
+        <div class="box-element hidden" id="payment-info">
+            <button id="make-payment">Pago en el Local</button>
+            <br><br>
+ 
+            
+            <strong><small>Opciones Paypal</small></strong>
+            <div id="paypal-button-container"></div>
+            
+        </div>
+    </div>
+
+        <!-- Fin Cambios -->
+
+    <div class="col-lg-6">
+        <div class="box-element">
+            <a  class="btn btn-success" href="{% url 'cart' %}">&#x2190; Regresar al Carrito</a>
+            <hr>
+            <h3>Orden de Compra</h3>
+            <hr>
+            {% for item in items %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{item.product.imageURL}}"></div>
+                <div style="flex:2"><p>{{item.product.name}}</p></div>
+                <div style="flex:1"><p>${{item.product.price}}</p></div>
+                <div style="flex:1"><p>x{{item.quantity}}</p></div>
+            </div>
+            {% endfor %}
+            <h5>Items: {{order.get_cart_items}}</h5>
+            <h5>Total:   ${{order.get_cart_total|floatformat:2}}</h5>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    
+    function EnableDisableTextbox(flexCheckDefault){
+        
+        var shipto1 = document.getElementById("shipto1");
+        shipto1.disabled = flexCheckDefault.checked?true:false;
+        if(!shipto1.disabled){
+            shipto1.focus();
+        }
+
+        var shipto2 = document.getElementById("shipto2");
+        shipto2.disabled = flexCheckDefault.checked?true:false;
+        if(!shipto2.disabled){
+            shipto2.focus();
+        }
+
+        var shipto3 = document.getElementById("shipto3");
+        shipto3.disabled = flexCheckDefault.checked?true:false;
+        if(!shipto3.disabled){
+            shipto3.focus();
+        }
+
+        var shipto4 = document.getElementById("shipto4");
+        shipto4.disabled = flexCheckDefault.checked?true:false;
+        if(!shipto4.disabled){
+            shipto4.focus();
+        }
+
+
+    }
+
+    function ResetTextbox(EnableDisableTextbox) {
+        
+        var shipto1a = document.getElementById("shipto1");
+
+        if (shipto1a.disabled) {
+        shipto1a.value = '';
+        }
+
+
+        var shipto2b = document.getElementById("shipto2");
+
+        if (shipto2b.disabled) {
+        shipto2b.value = '';
+        }
+
+        var shipto3c = document.getElementById("shipto3");
+
+        if (shipto3c.disabled) {
+        shipto3c.value = '';
+        }
+
+        var shipto4d = document.getElementById("shipto4");
+
+        if (shipto4d.disabled) {
+        shipto4d.value = '';
+        }
+    }
+
+
+</script>
+
+<script src="https://www.paypal.com/sdk/js?client-id=ATsVY4sxU6vBwq2bNMrQhe4Qm60xoZ2rE1S2UdC_ezVyqT55dmSaRCshxe2iwdPG5-WOLKJL8B-iR0qY&currency=USD"></script>
+
+<script>
+
+    var total = '{{order.get_cart_total}}'
+
+    // Render the PayPal button into #paypal-button-container
+    paypal.Buttons({
+
+
+        // locale:'es_AR',
+
+        // Set up the transaction
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: parseFloat(total).toFixed(2)
+                    }
+                }]
+            });
+        },
+
+        // Finalize the transaction
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(orderData) {
+    
+                submitFormData()
+    
+            });
+        }
+
+
+    }).render('#paypal-button-container');
+</script>
+
+<script type="text/javascript">
+    var shipping = '{{order.shipping}}'
+
+
+    if(shipping == 'False'){
+        document.getElementById('shipping-info').innerHTML = ''
+    }
+
+
+    if (shipping == 'False' && user != 'AnonymousUser'){
+        //Hide entire form if user is logged in and shipping is false
+        document.getElementById('form-wrapper').classList.add("hidden");
+        //Show payment if logged in user wants to buy an item that does not require shipping
+        document.getElementById('payment-info').classList.remove("hidden");
+    }
+
+    // Funcionalidad para realizar el pago.
+    
+    var form = document.getElementById('form')
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault()
+        console.log('Form submitted...')
+        document.getElementById('form-button').classList.add('hidden')
+        document.getElementById('payment-info').classList.remove('hidden')
+    })
+
+    document.getElementById('make-payment').addEventListener('click', function(e){
+        submitFormData()
+    })
+
+    function submitFormData(){
+        console.log('Payment button clicked')
+            
+        var userFormData = {
+            'name':null,
+            'email':null,
+            'total':total,
+        }
+
+        var shippingInfo = {
+            'address':null,
+            'city':null,
+            'state':null,
+            'zipcode':null,
+        }
+
+        if (shipping != 'False'){
+            shippingInfo.address = form.address.value
+            shippingInfo.city = form.city.value
+            shippingInfo.state = form.state.value
+            shippingInfo.zipcode = form.zipcode.value
+	    }
+
+	    if (user == 'AnonymousUser'){
+            userFormData.name = form.name.value
+            userFormData.email = form.email.value
+	    }
+
+        var url = '/process_order/'
+        fetch(url, {
+            method:'POST',
+            headers:{
+                'Content-Type':'applicaiton/json',
+                'X-CSRFToken':csrftoken,
+            }, 
+            body:JSON.stringify({'form':userFormData, 'shipping':shippingInfo}),
+	    })
+
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Success:', data);
+            alert('Transacción completa. ¡Felicitaciones, su pedido estará listo en 24hs!');  
+            window.location.href = "{% url 'store' %}"
+        })
+
+    }
+
+</script>
+
+<!-- Fin Cambios -->
+
+{% endblock content %}
